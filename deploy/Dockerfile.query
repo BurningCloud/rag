@@ -1,0 +1,26 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# 安装 uv 加速依赖安装
+RUN pip install --no-cache-dir uv
+
+# 先复制依赖文件，利用 Docker 层缓存
+COPY pyproject.toml uv.lock ./
+
+# 安装项目依赖
+RUN uv pip install --system --no-cache .
+
+# 复制应用源码和 Prompt 模板
+COPY app/ app/
+COPY prompts/ prompts/
+
+# 创建运行时目录
+RUN mkdir -p /app/output /app/logs
+
+EXPOSE 8001
+
+# 路径解析覆盖，避免容器内遍历文件系统
+ENV PROJECT_ROOT=/app
+
+CMD ["uvicorn", "app.query_process.api.query_service:app", "--host", "0.0.0.0", "--port", "8001"]

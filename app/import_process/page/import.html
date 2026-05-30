@@ -164,8 +164,10 @@
     const fileInput = document.getElementById('fileInput');
     const fileList = document.getElementById('fileList');
 
-    // 模拟后端API地址
-    const API_BASE = 'http://127.0.0.1:8000';
+    // 动态获取API地址：通过Nginx代理时使用同源地址，本地文件打开时回退到8000端口
+    const API_BASE = `${location.protocol}//${location.host}`.includes('http')
+        ? `${location.protocol}//${location.host}`
+        : 'http://127.0.0.1:8000';
 
     dropZone.addEventListener('dragover', (e) => {
         e.preventDefault();

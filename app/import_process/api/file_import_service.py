@@ -251,8 +251,8 @@ if __name__ == "__main__":
     # 启动uvicorn服务，绑定本地IP和8000端口，关闭自动重载（生产环境建议用workers多进程）
     uvicorn.run(
         app=app,
-        host="127.0.0.1",  # 仅本地访问，生产环境改为0.0.0.0（允许所有IP访问）
-        port=8000  # 服务端口
+        host=os.getenv("HOST", "0.0.0.0"),
+        port=int(os.getenv("PORT", "8000"))
     )
 
 
