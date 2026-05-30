@@ -152,7 +152,7 @@ rag/
 cd scripts && docker-compose up -d
 ```
 
-包含：Milvus（etcd + MinIO + standalone）+ Redis + Attu 管理界面
+不包含：Milvus（etcd + MinIO + standalone）+ Redis + Attu 管理界面，外部组件单独部署。
 
 ### 本地模型
 

@@ -17,8 +17,8 @@ services:
       - BGE_RERANKER_LARGE=/app/models/BAAI/bge-reranker-large
     volumes:
       - ../models:/app/models:ro
-      - import_output:/app/output
-      - app_logs:/app/logs
+      - /output:/app/output
+      - /app/logs/import_service:/app/logs
     restart: unless-stopped
 
   # =================== 查询服务 ===================
@@ -37,7 +37,7 @@ services:
       - BGE_RERANKER_LARGE=/app/models/BAAI/bge-reranker-large
     volumes:
       - ../models:/app/models:ro
-      - app_logs:/app/logs
+      - /app/logs/query_service:/app/logs
     restart: unless-stopped
 
   # =================== Nginx 前端代理 ===================
@@ -48,11 +48,9 @@ services:
       - "80:80"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - /app/nginx/html:/usr/share/nginx/html
     depends_on:
       - import_service
       - query_service
     restart: unless-stopped
 
-volumes:
-  import_output:
-  app_logs:
