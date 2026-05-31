@@ -1,0 +1,13 @@
+.venv/
+.git/
+__pycache__/
+*.pyc
+models/
+doc/
+output/
+logs/
+.claude/
+dist/
+build/
+*.egg-info/
+.env
