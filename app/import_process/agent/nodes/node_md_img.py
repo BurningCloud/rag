@@ -188,12 +188,9 @@ def step_2_scan_images(md_content: str, images_dir: Path) -> List[Tuple[str, str
         if not context_list:
             logger.warning(f"图片未在MD中引用，跳过处理：{image_file}")
             continue
-
         # 组装待处理图片元数据，取第一个匹配的上下文
         targets.append((image_file, img_path, context_list[0]))
         logger.info(f"图片加入待处理列表：{image_file}")
-
-        break
 
     logger.info(f"图片扫描完成，共筛选出待处理图片：{len(targets)} 张")
     return targets
