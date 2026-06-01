@@ -152,7 +152,7 @@ rag/
 cd scripts && docker-compose up -d
 ```
 
-不包含：Milvus（etcd + MinIO + standalone）+ Redis + Attu 管理界面，外部组件单独部署。
+包含：Milvus（etcd + MinIO + standalone）+ Redis + Attu 管理界面，外部组件单独部署。
 
 ### 本地模型
 
@@ -168,61 +168,6 @@ python -m app.import_process.api.file_import_service
 
 # 启动查询服务（端口 8001）
 python -m app.query_process.api.query_service
-```
-
-## 打包与部署
-
-### 构建产物
-
-| 产物 | 说明 |
-|---|---|
-| `dist/rag-0.1.0-py3-none-any.whl` | 项目 Wheel 包（含 `app/` + `prompts/`，不含 `page/`） |
-| `requirements.txt` | 全量依赖锁定（uv export 生成，无 hash） |
-
-### 打包命令
-
-```bash
-# 1. 构建 Wheel
-uv build
-
-# 2. 生成 requirements.txt（无 hash，适合 Docker pip install）
-uv export --format requirements-txt --no-hashes > requirements.txt
-```
-
-### Docker 部署架构
-
-```
-Nginx (80/443) ──┬── /import.html ──> 静态文件（宿主机挂载）
-                  ├── /chat.html ────> 静态文件（宿主机挂载）
-                  ├── /import/* ─────> import_service:8000
-                  └── /query/* ──────> query_service:8001
-
-import_service (8000) ── 知识导入 API
-query_service  (8001) ── 知识查询 API
-```
-
-- **后端服务**：基于 `nvidia/cuda:12.1.0-runtime-ubuntu22.04` 镜像，`pip install whl + requirements.txt`，`python -m` 启动
-- **前端页面**：HTML 文件由 Nginx 容器托管，挂载到宿主机 `./deploy/html/` 目录，修改无需重建镜像
-- **PyTorch CUDA 索引**：服务器 `pip install -r requirements.txt` 时需加 `--extra-index-url https://download.pytorch.org/whl/cu121`
-
-### 服务器部署步骤
-
-```bash
-# 1. 将产物传输到服务器
-scp dist/rag-0.1.0-py3-none-any.whl requirements.txt deploy/ user@server:/opt/rag/
-
-# 2. 启动服务
-cd /opt/rag && docker-compose up -d
-```
-
-### 前端页面挂载
-
-HTML 文件位于 `app/import_process/page/import.html` 和 `app/query_process/page/chat.html`，部署时复制到 `deploy/html/` 目录，由 Nginx 容器挂载：
-
-```bash
-# 初始化前端文件到挂载目录
-cp app/import_process/page/import.html deploy/html/
-cp app/query_process/page/chat.html deploy/html/
 ```
 
 ## Milvus Collection 说明

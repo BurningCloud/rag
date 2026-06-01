@@ -13,3 +13,5 @@ doc
 logs
 models
 output
+.env
+deploy/.env.docker

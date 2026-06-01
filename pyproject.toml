@@ -1,6 +1,6 @@
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+requires = ["uv_build"]
+build-backend = "uv_build"
 
 [project]
 name = "rag"
@@ -36,5 +36,12 @@ dependencies = [
     "zai-sdk==0.2.2",
 ]
 
-[tool.hatch.build.targets.wheel]
-packages = ["app"]
+# CPU 部署：从 PyTorch CPU 源下载，避免拉取 NVIDIA CUDA 包
+[tool.uv.sources]
+torch = { index = "pytorch-cpu" }
+torchaudio = { index = "pytorch-cpu" }
+torchvision = { index = "pytorch-cpu" }
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
