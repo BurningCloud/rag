@@ -6,7 +6,6 @@ build-backend = "uv_build"
 name = "rag"
 version = "0.1.0"
 description = "RAG 知识库问答系统 - 硬件设备手册智能检索"
-readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "fastapi>=0.136.3",
