@@ -1,11 +1,8 @@
-[build-system]
-requires = ["uv_build"]
-build-backend = "uv_build"
-
 [project]
 name = "rag"
 version = "0.1.0"
-description = "RAG 知识库问答系统 - 硬件设备手册智能检索"
+description = "Add your description here"
+readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "fastapi>=0.136.3",
@@ -26,21 +23,8 @@ dependencies = [
     "pymilvus-model>=0.3.2",
     "pymongo>=4.17.0",
     "python-dotenv>=1.2.2",
-    "python-multipart>=0.0.29",
+    "python-multipart>=0.0.30",
     "regex>=2026.5.9",
-    "torch==2.12.0",
-    "torchaudio>=2.11.0",
-    "torchvision>=0.27.0",
     "uvicorn>=0.48.0",
-    "zai-sdk==0.2.2",
+    "zai-sdk>=0.2.2",
 ]
-
-# CPU 部署：从 PyTorch CPU 源下载，避免拉取 NVIDIA CUDA 包
-[tool.uv.sources]
-torch = { index = "pytorch-cpu" }
-torchaudio = { index = "pytorch-cpu" }
-torchvision = { index = "pytorch-cpu" }
-
-[[tool.uv.index]]
-name = "pytorch-cpu"
-url = "https://download.pytorch.org/whl/cpu"
