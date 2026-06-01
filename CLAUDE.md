@@ -144,6 +144,20 @@ rag/
 
 事件类型：`ready`（连接建立） / `progress`（节点进度） / `delta`（LLM 增量） / `final`（最终答案+图片） / `error`（异常）
 
+## 代码提交
+
+```bash
+git add .
+
+git commit -m "根据提交代码自动总结描述"
+
+git push
+```
+
+
+
+
+
 ## 环境依赖
 
 ### 本地模型
