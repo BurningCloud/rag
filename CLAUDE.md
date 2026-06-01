@@ -146,14 +146,6 @@ rag/
 
 ## 环境依赖
 
-### 基础设施（Docker Compose 启动）
-
-```bash
-cd scripts && docker-compose up -d
-```
-
-包含：Milvus（etcd + MinIO + standalone）+ Redis + Attu 管理界面，外部组件单独部署。
-
 ### 本地模型
 
 - `BGE_M3_PATH` 指向本地 bge-m3 模型目录（默认 `models/BAAI/bge-m3`）

@@ -1,9 +1,0 @@
-
-mkdir -p /mongodb/data
-
-
-docker run -d \
-  --name mongodb \
-  -p 27017:27017 \
-  -v /mongodb/data:/data/db \
-  mongo:latest
