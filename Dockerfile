@@ -58,4 +58,4 @@ RUN mkdir -p /app/output /app/logs && chown -R appuser:appuser /app
 USER appuser
 
 # 启动命令由 docker-compose.yml 的 command 指定
-EXPOSE 8001 8002
+EXPOSE 8002

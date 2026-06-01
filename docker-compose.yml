@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  rag-import:
+  rag:
     container_name: rag-import
     build:
       context: .
@@ -16,17 +16,16 @@ services:
     env_file:
       - .env
 
-  rag-query:
-    container_name: rag-query
-    build:
-      context: .
-      dockerfile: Dockerfile
-    command: ["python", "-m", "app.query_process.api.query_service"]
-    ports:
-      - "8001:8001"
-    volumes:
-      - /opt/rag/models:/app/models:ro
-      - ./logs/query:/app/logs
-    env_file:
-      - .env
-    restart: on-failure
+#  rag-query:
+#    container_name: rag-query
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#    command: ["python", "-m", "app.query_process.api.query_service"]
+#    ports:
+#      - "8001:8001"
+#    volumes:
+#      - /opt/rag/models:/app/models:ro
+#      - ./logs/query:/app/logs
+#    env_file:
+#      - .env
