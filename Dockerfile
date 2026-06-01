@@ -30,6 +30,9 @@ WORKDIR /build
 # 先拷贝依赖声明，利用 Docker 缓存层
 COPY pyproject.toml ./
 
+# 安装项目依赖（阿里云镜像加速）
+RUN pip install --no-cache-dir --prefer-binary .
+
 
 
 # ============ 运行阶段 ============
