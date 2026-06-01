@@ -1,4 +1,16 @@
-FROM pytorch/pytorch:2.6.0-cpu
+FROM python:3.11-slim
+
+# 设置时区
+ENV TZ=Asia/Shanghai
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+# 阿里云 apt 镜像源
+RUN sed -i 's/deb.debian.org/mirrors.aliyun.com/g' /etc/apt/sources.list.d/debian.sources
+
+# 系统依赖（gcc 编译 numpy/pymilvus 等需要）
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc g++ libffi-dev && \
+    rm -rf /var/lib/apt/lists/*
 
 # 1. 设置工作目录（必须）
 WORKDIR /app
@@ -22,4 +34,4 @@ RUN useradd -m -u 1000 appuser && chown -R appuser /app
 USER appuser
 
 EXPOSE 8000
-CMD ["python", "app.py"]
+CMD ["python", "app/import_process/api/file_import_service.py"]
