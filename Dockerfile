@@ -19,12 +19,14 @@ WORKDIR /app
 RUN mkdir -p /root/.pip && \
     echo "[global]\nindex-url = https://mirrors.aliyun.com/pypi/simple/\ntrusted-host = mirrors.aliyun.com" > /root/.pip/pip.conf
 
-# 3. 复制依赖文件并安装
+# 3. 先单独安装 torch 三件套（从 PyTorch 官方 CPU 源下载，避免阿里云镜像超时）
+RUN pip install --no-cache-dir --timeout 300 \
+    torch==2.6.0+cpu torchvision==0.21.0+cpu torchaudio==2.6.0+cpu \
+    --extra-index-url https://download.pytorch.org/whl/cpu
+
+# 4. 再安装其余依赖（阿里云镜像 + 超时时间 300 秒）
 COPY requirements.txt .
-# 关键：防止 requirements.txt 中意外触发 torch 重装
-# 方法A：在 requirements.txt 中精确写明 torch==2.6.0+cpu（推荐）
-# 方法B：安装时强制约束
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --timeout 300 -r requirements.txt
 
 # 4. 复制项目代码（你原文件漏了这一步）
 COPY . .
