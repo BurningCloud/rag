@@ -27,6 +27,15 @@ RUN pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/ && \
 
 WORKDIR /build
 
+# 安装 CPU 版 PyTorch
+RUN pip install torch==2.8.0+cpu torchvision torchaudio \
+    -i https://pypi.tuna.tsinghua.edu.cn/simple \
+    -f https://mirrors.aliyun.com/pytorch-wheels/cpu
+
+
+# 生成约束文件（注意：在同一个 RUN 里做，避免分层导致文件丢失）
+RUN pip freeze | grep -E "torch|torchvision|torchaudio" > /tmp/constraints.txt
+
 # 先拷贝依赖声明，利用 Docker 缓存层
 COPY pyproject.toml ./
 
