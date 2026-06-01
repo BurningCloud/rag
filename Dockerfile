@@ -30,12 +30,7 @@ WORKDIR /build
 # 先拷贝依赖声明，利用 Docker 缓存层
 COPY pyproject.toml ./
 
-# 安装 CPU 版 PyTorch（阿里云镜像加速）
-RUN pip install --no-cache-dir \
-    torch torchvision torchaudio \
-    --index-url https://mirrors.aliyun.com/pytorch-wheels/cpu/
-
-# 安装项目其余依赖
+# 安装项目全部依赖（含 PyTorch CPU，阿里云 pip 镜像已包含）
 RUN pip install --no-cache-dir .
 
 
