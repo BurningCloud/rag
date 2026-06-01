@@ -1,0 +1,25 @@
+FROM pytorch/pytorch:2.6.0-cpu
+
+# 1. 设置工作目录（必须）
+WORKDIR /app
+
+# 2. 配置 pip 使用阿里云镜像（或直接写入配置文件）
+RUN mkdir -p /root/.pip && \
+    echo "[global]\nindex-url = https://mirrors.aliyun.com/pypi/simple/\ntrusted-host = mirrors.aliyun.com" > /root/.pip/pip.conf
+
+# 3. 复制依赖文件并安装
+COPY requirements.txt .
+# 关键：防止 requirements.txt 中意外触发 torch 重装
+# 方法A：在 requirements.txt 中精确写明 torch==2.6.0+cpu（推荐）
+# 方法B：安装时强制约束
+RUN pip install --no-cache-dir -r requirements.txt
+
+# 4. 复制项目代码（你原文件漏了这一步）
+COPY . .
+
+# 5. （可选）创建非 root 用户提升安全性
+RUN useradd -m -u 1000 appuser && chown -R appuser /app
+USER appuser
+
+EXPOSE 8000
+CMD ["python", "app.py"]
