@@ -33,8 +33,8 @@ COPY pyproject.toml ./
 # 拷贝本地 whl 文件（torch CPU 版，提前下载好放入 wheels/ 目录）
 COPY wheels/ ./wheels/
 
-# 从本地 whl 安装 torch CPU（--no-index 不访问网络，确保不下载 CUDA 版）
-RUN pip install --no-cache-dir --no-index --find-links=./wheels torch
+# 从本地 whl 安装 torch CPU（--no-deps 只装本体，不解析依赖，避免访问网络）
+RUN pip install --no-cache-dir --no-deps --find-links=./wheels torch
 
 # 锁定已安装的 torch 版本，防止后续安装拉入 CUDA 依赖
 RUN pip freeze | grep "^torch==" > /tmp/torch-constraint.txt
