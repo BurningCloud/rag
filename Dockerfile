@@ -25,8 +25,12 @@ RUN pip install --no-cache-dir --timeout 300 \
     --extra-index-url https://download.pytorch.org/whl/cpu
 
 # 4. 再安装其余依赖（阿里云镜像 + 超时时间 300 秒）
+#    用 constraint 锁住 torch 版本，防止 pip 把 CPU 版升级为 CUDA 版
 COPY requirements.txt .
-RUN pip install --no-cache-dir --timeout 300 -r requirements.txt
+RUN echo "torch==2.6.0+cpu" > /tmp/constraints.txt && \
+    echo "torchvision==0.21.0+cpu" >> /tmp/constraints.txt && \
+    echo "torchaudio==2.6.0+cpu" >> /tmp/constraints.txt && \
+    pip install --no-cache-dir --timeout 300 -c /tmp/constraints.txt -r requirements.txt
 
 # 4. 复制项目代码（你原文件漏了这一步）
 COPY . .
