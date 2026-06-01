@@ -30,18 +30,6 @@ WORKDIR /build
 # 先拷贝依赖声明，利用 Docker 缓存层
 COPY pyproject.toml ./
 
-# 拷贝本地 whl 文件（torch CPU 版，提前下载好放入 wheels/ 目录）
-COPY wheels/ ./wheels/
-
-# 从本地 whl 直接安装 torch CPU（指定文件路径，不走网络）
-RUN pip install --no-cache-dir --no-deps ./wheels/torch-*.whl
-
-# 锁定已安装的 torch 版本，防止后续安装拉入 CUDA 依赖
-RUN pip freeze | grep "^torch==" > /tmp/torch-constraint.txt
-
-# 安装项目其余依赖（阿里云镜像，torch 被约束锁定）
-RUN pip install --no-cache-dir --prefer-binary \
-    --constraint /tmp/torch-constraint.txt .
 
 
 # ============ 运行阶段 ============
