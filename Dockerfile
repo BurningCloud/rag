@@ -34,10 +34,3 @@ RUN echo "torch==2.6.0+cpu" > /tmp/constraints.txt && \
 
 # 4. 复制项目代码（你原文件漏了这一步）
 COPY . .
-
-# 5. （可选）创建非 root 用户提升安全性
-RUN useradd -m -u 1000 appuser && chown -R appuser /app
-USER appuser
-
-EXPOSE 8000
-CMD ["python", "app/import_process/api/file_import_service.py"]
