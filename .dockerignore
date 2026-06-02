@@ -1,0 +1,42 @@
+# 版本控制
+.git
+.gitignore
+
+# IDE / 编辑器
+.idea
+.vscode
+
+# Python 虚拟环境
+.venv
+__pycache__
+*.pyc
+
+# Claude Code
+.claude
+
+# 本地模型（通过 volume 挂载）
+models
+
+# 运行时产出（通过 volume 挂载）
+output
+logs
+
+# 文档 / 测试 / 打包（构建镜像不需要）
+doc
+test
+dist
+
+# Docker 本身
+Dockerfile
+Dockerfile.example
+docker-compose.yml
+
+# 根目录杂项
+.env
+*.md
+*.lock
+*.txt
+!requirements.txt
+.python-version
+main.py
+nginx.conf
