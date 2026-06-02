@@ -60,7 +60,7 @@ if [ ! -f "$PROJECT_DIR/nginx.conf" ]; then
 fi
 info "nginx.conf 已存在"
 
-# Dockerfile
+# Dockerfile.example2
 if [ ! -f "$PROJECT_DIR/Dockerfile" ]; then
     error "Dockerfile 不存在"
 fi

@@ -27,7 +27,7 @@ test
 dist
 
 # Docker 本身
-Dockerfile
+Dockerfile.example2
 Dockerfile.example
 docker-compose.yml
 
@@ -39,4 +39,4 @@ docker-compose.yml
 .python-version
 main.py
 nginx.conf
-Dockerfile.backup
+Dockerfile

@@ -6,7 +6,7 @@ services:
     container_name: rag-app
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.example2
     command: ["python", "-m", "app.main"]
     ports:
       - "8080:8000"
