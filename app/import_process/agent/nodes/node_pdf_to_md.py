@@ -158,7 +158,7 @@ def step_2_upload_and_poll(pdf_path_obj: Path, output_dir_obj: Path):
     # 提取核心数据：上传链接和任务唯一标识
     signed_url = resp_data["data"]["file_urls"][0]
     batch_id = resp_data["data"]["batch_id"]
-    logger.info(f"[获取上传链接] 成功，batch_id：{batch_id}，上传链接已生成")
+    logger.info(f"[获取上传链接] 成功，batch_id：{batch_id}，上传链接已生成: {signed_url}")
 
     # 2. 读取PDF二进制数据，准备上传
     logger.info(f"[文件上传] 开始读取PDF文件：{pdf_path_obj.name}")
@@ -182,6 +182,7 @@ def step_2_upload_and_poll(pdf_path_obj: Path, output_dir_obj: Path):
                 raise RuntimeError(f"[文件上传] 重试后仍失败，状态码：{put_resp.status_code}，响应内容：{put_resp.text}")
         logger.info(f"[文件上传] 成功，文件{pdf_path_obj.name}已存入云存储")
     except Exception as e:
+        logger.error("")
         raise RuntimeError(f"[文件上传] 网络异常导致上传失败，错误信息：{str(e)}")
     finally:
         # 无论成败，关闭Session释放网络连接，避免资源泄漏
