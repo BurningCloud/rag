@@ -14,8 +14,7 @@ from typing import List, Dict, Any
 from datetime import datetime
 import uvicorn
 # 第三方库
-from fastapi import FastAPI, UploadFile, File, BackgroundTasks, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import APIRouter, UploadFile, File, BackgroundTasks, HTTPException
 from fastapi.responses import FileResponse
 # 项目内部工具/配置/客户端
 from app.clients.minio_utils import get_minio_client
@@ -32,27 +31,14 @@ from app.import_process.agent.state import get_default_state
 from app.import_process.agent.main_graph import kb_import_app  # LangGraph全流程编译实例
 from app.core.logger import logger  # 项目统一日志工具
 
-# 初始化FastAPI应用实例
-# 标题和描述会在Swagger文档(http://ip:port/docs)中展示
-app = FastAPI(
-    title="File Import Service",
-    description="Web service for uploading files to Knowledge Base (PDF/MD → 解析 → 切分 → 向量化 → Milvus入库)"
-)
-
-# 跨域中间件配置：解决前端调用后端接口的跨域限制
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # 允许所有前端域名访问（生产环境建议指定具体域名）
-    allow_credentials=True,  # 允许携带Cookie等认证信息
-    allow_methods=["*"],  # 允许所有HTTP方法（GET/POST/PUT/DELETE等）
-    allow_headers=["*"],  # 允许所有请求头
-)
+# 使用APIRouter，由统一入口app.main挂载
+router = APIRouter(tags=["文件导入"])
 
 # --------------------------
 # 静态页面路由：返回文件导入前端页面import.html
 # 访问地址：http://localhost:8000/import.html
 # --------------------------
-@app.get("/import.html", response_class=FileResponse)
+@router.get("/import.html", response_class=FileResponse)
 async def get_import_page():
     """返回文件导入前端页面：import.html"""
     # 拼接HTML文件绝对路径，基于项目根目录定位
@@ -125,7 +111,7 @@ def run_graph_task(task_id: str, local_dir: str, local_file_path: str):
 # 支持多文件上传，核心流程：接收文件 → 本地保存 → MinIO上传 → 启动后台任务
 # 访问地址：http://localhost:8000/upload （POST请求，form-data格式传参）
 # --------------------------
-@app.post("/upload", summary="文件上传接口", description="支持多文件批量上传，自动触发知识库导入全流程")
+@router.post("/upload", summary="文件上传接口", description="支持多文件批量上传，自动触发知识库导入全流程")
 async def upload_files(background_tasks: BackgroundTasks, files: List[UploadFile] = File(...)):
     """
     文件上传核心接口
@@ -215,7 +201,7 @@ async def upload_files(background_tasks: BackgroundTasks, files: List[UploadFile
 # 前端轮询此接口获取单个任务的处理进度和状态
 # 访问地址：http://localhost:8000/status/{task_id} （GET请求）
 # --------------------------
-@app.get("/status/{task_id}", summary="任务状态查询", description="根据TaskID查询单个文件的处理进度和全局状态")
+@router.get("/status/{task_id}", summary="任务状态查询", description="根据TaskID查询单个文件的处理进度和全局状态")
 async def get_task_progress(task_id: str):
     """
     任务状态查询接口
@@ -246,14 +232,14 @@ async def get_task_progress(task_id: str):
 # 直接运行此脚本即可启动FastAPI服务，无需额外执行uvicorn命令
 # --------------------------
 if __name__ == "__main__":
-    """服务启动入口：本地开发环境直接运行"""
+    """单独运行导入服务（开发调试用，生产环境通过 app.main 统一启动）"""
+    from fastapi import FastAPI
+    from fastapi.middleware.cors import CORSMiddleware
+    _app = FastAPI(title="File Import Service")
+    _app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
+    _app.include_router(router)
     logger.info("File Import Service 服务启动中...")
-    # 启动uvicorn服务，绑定本地IP和8000端口，关闭自动重载（生产环境建议用workers多进程）
-    uvicorn.run(
-        app=app,
-        host=os.getenv("HOST", "0.0.0.0"),
-        port=int(os.getenv("PORT", "8000"))
-    )
+    uvicorn.run(app=_app, host=os.getenv("HOST", "0.0.0.0"), port=int(os.getenv("PORT", "8000")))
 
 
 

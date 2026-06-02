@@ -7,35 +7,24 @@
 作者: ply
 创建日期: 2026/5/29 11:43
 """
+import os
 from pathlib import Path
 import uuid
 import uvicorn
-from fastapi import FastAPI, BackgroundTasks, HTTPException, Request
+from fastapi import APIRouter, BackgroundTasks, HTTPException, Request
 from fastapi.responses import FileResponse, StreamingResponse
 from pydantic import BaseModel, Field
-from starlette.middleware.cors import CORSMiddleware
 
 from app.utils.task_utils import *
 from app.utils.sse_utils import create_sse_queue, SSEEvent, sse_generator
 from app.clients.mongo_util import *
 from app.query_process.agent.main_graph import query_app
 
-# 后续导入启动图对象
-#from app.query_process.main_graph import query_app
-
-
-# 定义fastapi对象
-app = FastAPI(title="query service",description="掌柜智库查询服务！")
-# 跨域问题解决
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# 使用APIRouter，由统一入口app.main挂载
+router = APIRouter(tags=["知识查询"])
 
 # 返回chat.html页面
-@app.get("/chat.html")  # 对外访问地址
+@router.get("/chat.html")  # 对外访问地址
 async def chat():
     # 从 api -> query_process
     current_dir_parent_path = Path(__file__).absolute().parent.parent
@@ -56,7 +45,7 @@ class QueryRequest(BaseModel):
     is_stream: bool = Field(False, description="是否流式返回")
 
 
-@app.post("/query")
+@router.post("/query")
 async def query(background_tasks: BackgroundTasks, request: QueryRequest):
     """
     1 解析参数
@@ -120,7 +109,7 @@ def run_query_graph(session_id: str, user_query: str, is_stream: bool = True):
             push_to_session(session_id, SSEEvent.ERROR, {"error": str(e)})
 
 
-@app.get("/stream/{session_id}")
+@router.get("/stream/{session_id}")
 async def stream(session_id: str, request: Request):
     print("调用流式/stream...")
     """
@@ -137,7 +126,7 @@ async def stream(session_id: str, request: Request):
     )
 
 
-@app.get("/history/{session_id}")
+@router.get("/history/{session_id}")
 async def history(session_id: str, limit: int = 50):
     """
     查询当前会话历史记录
@@ -159,7 +148,7 @@ async def history(session_id: str, limit: int = 50):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"history error: {e}")
 
-@app.delete("/history/{session_id}")
+@router.delete("/history/{session_id}")
 async def clear_chat_history(session_id: str):
     count =  clear_history(session_id)
     return {"message": "History cleared", "deleted_count": count}
@@ -177,7 +166,7 @@ async def clear_chat_history(session_id: str):
 
 
 # 证明服务器启动即可
-@app.get("/health")
+@router.get("/health")
 async def health():
     """
     检查服务是否正常
@@ -190,7 +179,13 @@ async def health():
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host=os.getenv("HOST", "0.0.0.0"), port=int(os.getenv("PORT", "8001")))
+    """单独运行查询服务（开发调试用，生产环境通过 app.main 统一启动）"""
+    from fastapi import FastAPI
+    from fastapi.middleware.cors import CORSMiddleware
+    _app = FastAPI(title="query service")
+    _app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
+    _app.include_router(router)
+    uvicorn.run(_app, host=os.getenv("HOST", "0.0.0.0"), port=int(os.getenv("PORT", "8001")))
 
 
 

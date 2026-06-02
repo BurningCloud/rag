@@ -20,7 +20,7 @@
 
 ## 两大核心流程
 
-### 知识导入（import_process）— 端口 8000
+### 知识导入（import_process）
 
 入口：`app/import_process/api/file_import_service.py`
 
@@ -32,7 +32,7 @@
 - 工作流定义：`app/import_process/agent/main_graph.py`
 - 状态定义：`app/import_process/agent/state.py`（`ImportGraphState`）
 
-### 知识查询（query_process）— 端口 8001
+### 知识查询（query_process）
 
 入口：`app/query_process/api/query_service.py`
 
@@ -54,7 +54,6 @@ rag/
 ├── pyproject.toml                # 项目依赖
 ├── prompts/                      # LLM Prompt 模板（.prompt 文件，用 {var} 占位符）
 ├── doc/                          # 原始 PDF 文档
-├── scripts/docker-compose.yml    # Milvus 基础设施（etcd + MinIO + Milvus + Redis + Attu）
 ├── app/
 │   ├── config/                   # 配置类（@dataclass，从 .env 读取）
 │   │   ├── lm_config.py          # LLM 配置（模型名/API密钥/温度）
@@ -166,15 +165,7 @@ git push
 - `BGE_RERANKER_LARGE` 指向本地 bge-reranker-large 模型目录
 - CPU 模式设置 `BGE_DEVICE=cpu`、`BGE_FP16=0`；GPU 模式设置 `BGE_DEVICE=cuda:0`、`BGE_FP16=1`
 
-## 常用启动命令
 
-```bash
-# 启动导入服务（端口 8000）
-python -m app.import_process.api.file_import_service
-
-# 启动查询服务（端口 8001）
-python -m app.query_process.api.query_service
-```
 
 ## Milvus Collection 说明
 
@@ -192,3 +183,65 @@ python -m app.query_process.api.query_service
 4. **向量归一化**：bge-m3 开启 `normalize_embeddings=True`，适配 Milvus IP 内积检索
 5. **Embedding 批量处理**：每批 5 条，避免 GPU OOM
 6. **Prompt 长度控制**：`MAX_CONTEXT_CHARS = 12000`，参考文档 + 历史对话共享额度
+
+## 部署架构
+
+导入服务和查询服务已合并为统一入口 `app/main.py`，通过 Nginx 反向代理对外提供单端口访问。
+
+```
+浏览器 → Nginx(:80) → rag-app(:8000)
+                      ├── /import.html, /upload, /status/{id}  ← 导入路由
+                      ├── /chat.html, /query, /stream/{id}     ← 查询路由
+                      └── /health, /history/{id}               ← 通用路由
+```
+
+### 关键文件
+
+| 文件 | 说明 |
+|---|---|
+| `app/main.py` | 统一入口，创建 FastAPI 应用并 include 两个 APIRouter |
+| `app/import_process/api/file_import_service.py` | 导入路由（`router = APIRouter(tags=["文件导入"])`） |
+| `app/query_process/api/query_service.py` | 查询路由（`router = APIRouter(tags=["知识查询"])`） |
+| `nginx.conf` | Nginx 反向代理配置（SSE 流式接口关闭缓冲） |
+| `docker-compose.yml` | 编排 rag-app + nginx 两个容器 |
+
+### Docker 部署步骤
+
+```bash
+# 1. 确保 .env 文件已配置（LLM/Embedding/Milvus/MongoDB/MinIO/MinerU）
+# 2. 确保本地模型已挂载到宿主机 /opt/rag/models（bge-m3 + bge-reranker-large）
+
+# 3. 构建并启动
+docker-compose up -d --build
+
+# 4. 查看日志
+docker-compose logs -f rag-app
+
+# 5. 验证服务
+#    Swagger 文档：http://host:8000/docs
+#    导入页面：    http://host/import.html
+#    查询页面：    http://host/chat.html
+#    健康检查：    http://host/health
+
+# 6. 停止服务
+docker-compose down
+```
+
+### 本地开发
+
+```bash
+# 统一启动（推荐）
+python -m app.main
+
+# 单独调试导入服务（端口 8000）
+python -m app.import_process.api.file_import_service
+
+# 单独调试查询服务（端口 8001）
+python -m app.query_process.api.query_service
+```
+
+### Nginx 注意事项
+
+- SSE 流式接口 `/stream/` 已关闭 `proxy_buffering`，保持长连接
+- 文件上传限制 `client_max_body_size 200M`，按需调整
+- 生产环境建议将 `allow_origins` 从 `*` 改为具体域名
