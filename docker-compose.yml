@@ -11,6 +11,8 @@ services:
       - /rag/models:/rag/models:ro
       - /rag/output:/rag/output
       - /rag/logs:/rag/logs
+    environment:
+      - PROJECT_ROOT=/rag
     env_file:
       - .env
     restart: unless-stopped
