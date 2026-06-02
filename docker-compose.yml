@@ -13,6 +13,8 @@ services:
       - /rag/logs:/rag/logs
     environment:
       - PROJECT_ROOT=/rag
+      - BGE_M3_PATH=/rag/models/BAAI/bge-m3
+      - BGE_RERANKER_LARGE=/rag/models/BAAI/bge-reranker-large
     env_file:
       - .env
     restart: unless-stopped
