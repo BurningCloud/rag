@@ -11,8 +11,8 @@ services:
       - "8000:8000"
     volumes:
       - /rag/models:/app/models:ro
-      - ./output:/app/output
-      - ./logs:/app/logs
+      - /rag/output:/app/output
+      - /rag/logs:/app/logs
     env_file:
       - .env
     restart: unless-stopped
@@ -23,7 +23,7 @@ services:
     ports:
       - "80:80"
     volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - /ai-finance/frontend/nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - /ai-finance/frontend/html:/usr/share/nginx/html
     depends_on:
       - rag-app
