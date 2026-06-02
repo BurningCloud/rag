@@ -2,18 +2,15 @@ version: '3.8'
 
 services:
   rag-app:
-    image: rag-server:1.0
+    image: rag-app:1.0
     container_name: rag-app
-    build:
-      context: .
-      dockerfile: Dockerfile.example2
     command: ["python", "-m", "app.main"]
     ports:
       - "8080:8000"
     volumes:
-      - /rag/models:/app/models:ro
-      - /rag/output:/app/output
-      - /rag/logs:/app/logs
+      - /rag/models:/rag/models:ro
+      - /rag/output:/rag/output
+      - /rag/logs:/rag/logs
     env_file:
       - .env
     restart: unless-stopped
