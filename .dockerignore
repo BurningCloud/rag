@@ -40,3 +40,4 @@ docker-compose.yml
 .python-version
 main.py
 nginx.conf
+Dockerfile.backup
