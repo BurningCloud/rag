@@ -1,4 +1,5 @@
-FROM python:3.11-slim
+#FROM python:3.11-slim
+FROM rag:1.0
 
 # 设置时区
 ENV TZ=Asia/Shanghai
