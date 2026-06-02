@@ -1,0 +1,48 @@
+# Git
+.git
+.gitignore
+
+# Python 缓存和虚拟环境
+__pycache__
+*.pyc
+*.pyo
+.venv
+venv
+
+# IDE
+.idea
+.vscode
+.claude
+
+# 日志和输出（通过 volume 挂载）
+logs/
+output/
+
+# 本地模型（通过 volume 挂载）
+models/
+
+# 原始文档
+doc/
+
+# 测试
+test/
+
+# 构建产物
+dist/
+
+# Docker 相关
+Dockerfile*
+docker-compose*
+deploy.sh
+
+# 环境变量（通过 docker-compose env_file 注入，不打入镜像）
+.env
+
+# 杂项
+*.md
+.python-version
+uv.lock
+requirements.txt
+pyproject.toml
+nginx.conf
+main.py
