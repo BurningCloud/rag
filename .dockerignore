@@ -32,7 +32,6 @@ Dockerfile.example
 docker-compose.yml
 
 # 根目录杂项
-.env
 *.md
 *.lock
 *.txt
